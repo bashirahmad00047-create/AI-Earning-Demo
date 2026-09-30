@@ -1,0 +1,246 @@
+/* ==========================================================================
+   AI Business Solutions - Core Application Logic
+   Handles Mobile Navigation, Contact Form AJAX, Portfolio Modals
+   ========================================================================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+  initMobileNav();
+  initContactForm();
+  initPortfolioModals();
+  initScrollSpy();
+});
+
+/**
+ * Mobile Navigation Toggle
+ */
+function initMobileNav() {
+  const toggleBtn = document.getElementById('mobileMenuToggle');
+  const navLinks = document.getElementById('navLinks');
+
+  if (!toggleBtn || !navLinks) return;
+
+  toggleBtn.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+    const isExpanded = navLinks.classList.contains('active');
+    toggleBtn.setAttribute('aria-expanded', isExpanded);
+  });
+
+  // Close nav on click of any link
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.classList.remove('active');
+    });
+  });
+}
+
+/**
+ * Contact Form AJAX Handler
+ * Securely submits without external secret API keys
+ */
+function initContactForm() {
+  const form = document.getElementById('contactForm');
+  const alertBox = document.getElementById('formAlert');
+  const submitBtn = document.getElementById('contactSubmitBtn');
+
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const service = document.getElementById('contactService').value;
+    const message = document.getElementById('contactMessage').value.trim();
+
+    if (!name || !email || !message) {
+      showAlert('Please complete all required fields (Name, Email, and Message).', 'error');
+      return;
+    }
+
+    // Set button loading state
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+      <svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+        <path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="0.9"></path>
+      </svg>
+      Sending Inquiry...
+    `;
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ name, email, service, message })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        showAlert(data.message || 'Your inquiry was sent successfully!', 'success');
+        form.reset();
+      } else {
+        showAlert(data.message || 'Failed to submit inquiry. Please try again.', 'error');
+      }
+    } catch (err) {
+      console.error('Contact error:', err);
+      showAlert('Connection error. Please try again or email us directly.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+    }
+  });
+
+  function showAlert(msg, type) {
+    if (!alertBox) return;
+    alertBox.textContent = msg;
+    alertBox.className = 'form-status-alert ' + (type === 'success' ? 'form-status-success' : 'form-status-error');
+    alertBox.style.display = 'block';
+
+    if (type === 'success') {
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 7000);
+    }
+  }
+}
+
+/**
+ * Portfolio Detail Modal
+ */
+function initPortfolioModals() {
+  const modal = document.getElementById('portfolioModal');
+  const closeBtn = document.getElementById('modalCloseBtn');
+  const modalBody = document.getElementById('modalBodyContent');
+  const modalTitle = document.getElementById('modalTitle');
+  const viewBtns = document.querySelectorAll('.view-project-btn');
+
+  if (!modal || !closeBtn || !modalBody) return;
+
+  viewBtns.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const projectId = btn.getAttribute('data-project');
+      if (!projectId) return;
+
+      modalTitle.textContent = 'Loading Case Study...';
+      modalBody.innerHTML = '<div style="text-align: center; padding: 2rem; color: #94a3b8;">Loading project details...</div>';
+      modal.style.display = 'flex';
+
+      try {
+        const res = await fetch(`/api/portfolio/${projectId}`);
+        const data = await res.json();
+
+        if (res.ok && data.status === 'success') {
+          renderProjectDetails(data.project);
+        } else {
+          modalBody.innerHTML = '<div style="color: #fca5a5; padding: 1rem;">Could not load project details.</div>';
+        }
+      } catch (err) {
+        modalBody.innerHTML = '<div style="color: #fca5a5; padding: 1rem;">Network error loading project.</div>';
+      }
+    });
+  });
+
+  function renderProjectDetails(project) {
+    modalTitle.textContent = project.title;
+
+    let metricsHtml = '';
+    if (project.metrics && project.metrics.length) {
+      metricsHtml = `
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08);">
+          ${project.metrics.map(m => `
+            <div style="text-align: center;">
+              <div style="font-size: 1.25rem; font-weight: 800; color: #10b981;">${m.value}</div>
+              <div style="font-size: 0.75rem; color: #94a3b8;">${m.label}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    let featuresHtml = '';
+    if (project.features && project.features.length) {
+      featuresHtml = `
+        <h4 style="margin: 1.25rem 0 0.5rem; color: #f8fafc; font-size: 1rem;">Key Solution Features:</h4>
+        <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+          ${project.features.map(f => `
+            <li style="display: flex; gap: 0.5rem; font-size: 0.9rem; color: #cbd5e1;">
+              <span style="color: #38bdf8;">✔</span> ${f}
+            </li>
+          `).join('')}
+        </ul>
+      `;
+    }
+
+    let tagsHtml = '';
+    if (project.tags && project.tags.length) {
+      tagsHtml = `
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem;">
+          ${project.tags.map(t => `
+            <span style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; padding: 0.25rem 0.6rem; border-radius: 0.25rem; font-size: 0.75rem; font-family: monospace;">
+              ${t}
+            </span>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    modalBody.innerHTML = `
+      <div style="font-size: 0.85rem; color: #38bdf8; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+        ${project.category} • Client: ${project.client}
+      </div>
+      <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 1rem;">
+        ${project.description}
+      </p>
+      ${metricsHtml}
+      ${featuresHtml}
+      ${tagsHtml}
+      <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('portfolioModal').style.display='none'">Close</button>
+        <a href="#contact" class="btn btn-primary btn-sm" onclick="document.getElementById('portfolioModal').style.display='none'">Build Similar Solution</a>
+      </div>
+    `;
+  }
+
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+}
+
+/**
+ * Scroll Spy for Navbar Links
+ */
+function initScrollSpy() {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    const scrollPosition = window.pageYOffset + 200;
+
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.offsetHeight;
+      if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+        current = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === `#${current}`) {
+        link.classList.add('active');
+      }
+    });
+  });
+}

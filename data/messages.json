@@ -1,0 +1,79 @@
+[
+  {
+    "id": 1790748592246,
+    "timestamp": "2026-09-30T11:09:52.246832",
+    "name": "Alex Freelance Client",
+    "email": "alex@example.com",
+    "service": "Python Automation",
+    "message": "We need a Python script to scrape daily pricing from 3 portals.",
+    "status": "received"
+  },
+  {
+    "id": 1790748683197,
+    "timestamp": "2026-09-30T11:11:23.197933",
+    "name": "Sarah Connor",
+    "email": "sarah@skynet-prevention.com",
+    "service": "Python Automation",
+    "message": "Need an automated script for invoice verification.",
+    "status": "received"
+  },
+  {
+    "id": 1790758723530,
+    "timestamp": "2026-09-30T13:58:43.530472",
+    "name": "Alex Freelance Client",
+    "email": "alex@example.com",
+    "service": "Python Automation",
+    "message": "We need a Python script to scrape daily pricing from 3 portals.",
+    "status": "received"
+  },
+  {
+    "id": 1790759050712,
+    "timestamp": "2026-09-30T14:04:10.712692",
+    "name": "Alex Freelance Client",
+    "phone": "+92 300 1234567",
+    "email": "alex@example.com",
+    "service": "Python Automation",
+    "message": "We need a Python script to scrape daily pricing from 3 portals.",
+    "status": "received"
+  },
+  {
+    "id": 1790759103761,
+    "timestamp": "2026-09-30T14:05:03.761730",
+    "name": "Alex Freelance Client",
+    "phone": "+92 300 1234567",
+    "email": "alex@example.com",
+    "service": "Python Automation",
+    "message": "We need a Python script to scrape daily pricing from 3 portals.",
+    "status": "received"
+  },
+  {
+    "id": 1790759121019,
+    "timestamp": "2026-09-30T14:05:21.019954",
+    "name": "Verification Tester",
+    "phone": "+92 300 1234567",
+    "email": "verify@test.local",
+    "service": "Business Website Development",
+    "message": "Testing contact form integration with phone field.",
+    "status": "received"
+  },
+  {
+    "id": 1790759350012,
+    "timestamp": "2026-09-30T14:09:10.012876",
+    "name": "Alex Freelance Client",
+    "phone": "+92 300 1234567",
+    "email": "alex@example.com",
+    "service": "Python Automation",
+    "message": "We need a Python script to scrape daily pricing from 3 portals.",
+    "status": "received"
+  },
+  {
+    "id": 1790759374564,
+    "timestamp": "2026-09-30T14:09:34.564113",
+    "name": "Direct Workspace Verification",
+    "phone": "+92 300 1234567",
+    "email": "direct-check@example.com",
+    "service": "Python Automation",
+    "message": "Direct automated check verifying file edits on disk.",
+    "status": "received"
+  }
+]
